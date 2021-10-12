@@ -12,7 +12,7 @@
     $ npm i
     ```
     
-1. **Start the development server.**
+1. **Start both servers simultaneously using.**
     
     ```
     $ npm run dev
