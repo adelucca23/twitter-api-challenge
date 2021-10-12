@@ -9,18 +9,17 @@ function Dashboard() {
 
 
     const [searchText, setSearchText] = React.useState('');
-    const [filterArray, setFilterArray] = React.useState([]);
+    const [filterText, setFilterText] = React.useState('');
     const [listOfTweets, setListOfTweets] = React.useState(null);
     const [hashtagList, setHashtagList] = React.useState([]);
     const [lastId, setLastId] = React.useState(null);
-    // console.log('filterValue', filterValue);
 
 
     /* Pull tweets by search term or filter */
     function filterFeed() {
         axios.get('/api/search', {
             params: {
-                q: searchText,
+                q: filterText || searchText,
                 result_type: 'popular',
                 count: 5,
             },
@@ -49,14 +48,11 @@ function Dashboard() {
             }).catch(err => alert(err.message))
     }
 
+
+    /* Re-call API when search or filter text changes */
     React.useEffect(() => {
         filterFeed();
-    }, [searchText]);
-
-    //
-    // React.useEffect(() => {
-    //     filterFeed();
-    // }, []);
+    }, [searchText, filterText]);
 
 
     /* On new keypress in search input, set search text */
@@ -66,12 +62,13 @@ function Dashboard() {
     }, 500), []);
 
 
+    /*  Load more button loads the next 5 tweets using max_id */
     function loadMore(e) {
         e.stopPropagation();
 
         axios.get('/api/load-more', {
             params: {
-                q: searchText,
+                q: filterText || searchText,
                 result_type: 'popular',
                 count: 5,
                 max_id: lastId,
@@ -80,15 +77,13 @@ function Dashboard() {
             .then(({ data }) => {
                 const { statuses } = data;
                 const newList = hashtagList;
+                const newTweetObj = listOfTweets;
 
                 statuses.forEach((status) => {
                     const { entities } = status;
                     const { hashtags } = entities;
 
-                    setListOfTweets((tweets) => {
-                        tweets.push(status);
-                        return tweets;
-                    });
+                    newTweetObj.push(status);
 
                     if (hashtags.length > 0) {
                         hashtags.forEach((tag) => {
@@ -101,128 +96,144 @@ function Dashboard() {
 
                     setLastId(status.id);
                 });
+                setListOfTweets(newTweetObj);
                 setHashtagList(newList);
             }).catch(err => alert(err.message));
     }
 
 
     return (
-        <div className="container">
-            <div className="mainContent">
-                <h3 className="headerText">Tweet Feed</h3>
-                <span className="search">
-                    <input
-                        className="searchInput"
-                        defaultValue={searchText}
-                        onChange={(e) => debounceSearch(e.target.value)}
-                        placeholder="Search by keyword"
-                        type="search"
-                    />
-                </span>
-                {searchText
-                    ? (
-                        <React.Fragment>
-                            <div className="filterHashtagsMobile">
-                                <h4>Filter by hashtag</h4>
-                                <div>
-                                    {hashtagList.map((hashtag) => {
-                                        const isChecked = filterArray[hashtag];
-                                        return (
-                                            <div>
-                                                <label className={isChecked ? "checkedlabel" : "label"}>
+        <React.Fragment>
+            <div className="container">
+                <div className="mainContent">
+                    <h3>Tweet Feed</h3>
+                    <span className="search">
+                        <input
+                            className="searchInput"
+                            defaultValue={searchText}
+                            onChange={(e) => debounceSearch(e.target.value)}
+                            placeholder="Search by keyword"
+                            type="search"
+                        />
+                    </span>
+                    {searchText
+                        ? (
+                            <React.Fragment>
+                                <div className="filterHashtagsMobile">
+                                    <h4>Filter by hashtag</h4>
+                                    <fieldset
+                                        className="hashtagSet"
+                                        onChange={(e) => {
+                                            if (e.target.checked) setFilterText(e.target.value);
+                                            else setFilterText('');
+                                        }}
+                                    >
+                                        {hashtagList.map((hashtag) => {
+                                            return (
+                                                <label>
+                                                    <input
+                                                        className="hashtag"
+                                                        type="checkbox"
+                                                        name="hashtags"
+                                                        value={hashtag}
+                                                        checked={filterText === hashtag}
+                                                    />
                                                     #{hashtag}
                                                 </label>
-                                                <input
-                                                    className="hashtag"
-                                                    id="test"
-                                                    onChange={(e) => {
-                                                        setFilterArray((array) => {
-                                                            array[hashtag] = e.target.checked;
-                                                            return array;
-                                                        });
-                                                    }}
-                                                    type="checkbox"
-                                                    value={hashtag}
-                                                />
+                                            );
+                                        })}
+                                    </fieldset>
+                                </div>
+                                <div className="feedContent">
+                                    {listOfTweets && listOfTweets.map((tweet) => {
+                                        const {text, user, entities} = tweet;
+                                        const {hashtags} = entities;
+                                        const splitIndex = text.indexOf('http');
+                                        let url = '';
+                                        let decodedContent = _.unescape(text);
+
+                                        if (splitIndex > 0) {
+                                            const content = text.substring(0, splitIndex);
+                                            url = text.substring(splitIndex);
+                                            decodedContent = _.unescape(content);
+                                        }
+
+                                        return (
+                                            <div className="tweetBox">
+                                                <img alt="User" className="profilePicture" src={user.profile_image_url}/>
+                                                <div className="tweetContent">
+                                                    <h4>@{user.screen_name}</h4>
+                                                    <p>
+                                                        {decodedContent}
+                                                        {url && <a className="tweetLink" href={url}>{url}</a>}
+                                                    </p>
+                                                    {hashtags && Object.keys(hashtags).map((key, index) => {
+                                                        const hashtag = hashtags[key];
+                                                        return (
+                                                            <fieldset
+                                                                className="usedHashtagSet"
+                                                                key={index}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setFilterText(e.target.value);
+                                                                    else setFilterText('');
+                                                                }}
+                                                            >
+                                                                <label>
+                                                                    <input
+                                                                        className="hashtag"
+                                                                        type="checked"
+                                                                        name="postHashtags"
+                                                                        value={hashtag.text}
+                                                                        checked={filterText === hashtag.text}
+                                                                    />
+                                                                    #{hashtag.text}
+                                                                </label>
+                                                            </fieldset>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         );
                                     })}
-                                </div>
-                            </div>
-                            <div className="feedContent">
-                                {listOfTweets && listOfTweets.map((tweet) => {
-                                    const {text, user, entities} = tweet;
-                                    const {hashtags} = entities;
-                                    const splitIndex = text.indexOf('http');
-                                    let url = '';
-                                    let decodedContent = _.unescape(text);
-
-                                    if (splitIndex > 0) {
-                                        const content = text.substring(0, splitIndex);
-                                        url = text.substring(splitIndex);
-                                        decodedContent = _.unescape(content);
+                                    {lastId && listOfTweets.length > 4 &&
+                                        <button className="loadMore" onClick={(e) => loadMore(e)}>Load more</button>
                                     }
-
-                                    return (
-                                        <div className="tweetBox">
-                                            <img alt="User" className="profilePicture" src={user.profile_image_url}/>
-                                            <div className="tweetContent">
-                                                <h4>@{user.screen_name}</h4>
-                                                <p>
-                                                    {decodedContent}
-                                                    {url && <a className="tweetLink" href={url}>{url}</a>}
-                                                </p>
-                                                {hashtags && Object.keys(hashtags).map((key, index) => {
-                                                    const hashtag = hashtags[key];
-                                                    return (
-                                                        <span className="usedTags" key={index}>
-                                                            #{hashtag.text}
-                                                        </span>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {lastId &&
-                                    <button className="loadMore" onClick={(e) => loadMore(e)}>Load more</button>
-                                }
-                            </div>
-                        </React.Fragment>
-                    ) : (
-                        <div className="noResults">Please type a search term to continue</div>
-                    )
+                                </div>
+                            </React.Fragment>
+                        ) : (
+                            <div className="noResults">Please type a search term to continue</div>
+                        )
+                    }
+                </div>
+                {searchText &&
+                    <div className="filterHashtags">
+                        <h4>Filter by hashtag</h4>
+                        <fieldset
+                            className="hashtagSet"
+                            onChange={(e) => {
+                                if (e.target.checked) setFilterText(e.target.value);
+                                else setFilterText('');
+                            }}
+                        >
+                            {hashtagList.map((hashtag) => {
+                                return (
+                                    <label>
+                                        <input
+                                            className="hashtag"
+                                            type="checked"
+                                            name="hashtags"
+                                            value={hashtag}
+                                            checked={filterText === hashtag}
+                                        />
+                                        #{hashtag}
+                                    </label>
+                                );
+                            })}
+                        </fieldset>
+                    </div>
                 }
             </div>
-            {searchText &&
-                <div className="filterHashtags">
-                    <h4>Filter by hashtag</h4>
-                    {hashtagList.map((hashtag) => {
-                        const isChecked = filterArray[hashtag];
-                        return (
-                            <div className="test">
-                                <label>#{hashtag}</label>
-                                <input
-                                    className="hashtag"
-                                    checked={isChecked}
-                                    id="test"
-                                    onChange={(e) => {
-                                        console.log('e', e.target.checked);
-                                        setFilterArray((array) => {
-                                            array[hashtag] = e.target.checked;
-                                            console.log('array', array);
-                                            return array;
-                                        });
-                                    }}
-                                    type="checkbox"
-                                    value={hashtag}
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
-            }
-        </div>
+        </React.Fragment>
     );
 }
 
