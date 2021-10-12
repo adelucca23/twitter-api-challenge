@@ -1,0 +1,167 @@
+.container {
+    display: flex;
+    justify-content: center;
+    background-color: #F5F5F5;
+    font-family: Segoe, sans-serif;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        display: block;
+        padding: 0;
+    }
+}
+
+.mainContent {
+    width: 40%;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        width: 100%;
+    }
+}
+
+.headerText {
+    text-align: left;
+    margin-top: 0;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        padding: 1rem;
+        margin: 0;
+    }
+}
+
+.searchInput {
+    padding: .75rem;
+    color: gray;
+    width: 98%;
+    margin-bottom: 1rem;
+    margin-right: 11rem;
+    border: 1px solid lightgrey;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.feedContent {
+    background-color: white;
+    margin-right: 1rem;
+    box-shadow: 2px 2px 2px 3px #ECECEC;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        margin-right: 0;
+    }
+}
+
+.tweetBox {
+    display: flex;
+    padding: 1.5rem;
+    word-wrap: break-word;
+
+    &:nth-child(even) {
+        background-color: #F5F5F5;
+    }
+}
+
+.loadMore {
+    background-color: white;
+    color: #026592;
+    border: none;
+    padding: 2rem;
+    cursor: pointer;
+    width: 100%;
+
+    &:hover {
+        color: black;
+    }
+}
+
+.tweetContent {
+    margin-left: 1rem;
+
+    h4 {
+        margin: 0;
+    }
+}
+
+.profilePicture {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 5rem;
+}
+
+.tweetLink {
+    color: #026592;
+}
+
+.usedTags {
+    background-color: #DBF3FA;
+    color: #026592;
+    border: 0;
+    border-radius: 20px;
+    padding: 0.5rem;
+    margin-top: 1rem;
+
+    &:not(:first-of-type) {
+        margin-left: 0.5rem;
+    }
+}
+
+.filterHashtags {
+    width: 18rem;
+    max-height: 20rem;
+    background-color: white;
+    padding: 0.5rem;
+    box-shadow: 2px 2px 2px 2px #ECECEC;
+
+    h4 {
+        margin-left: 0.5rem;
+    }
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        display: none;
+    }
+}
+
+.filterHashtagsMobile {
+    display: none;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        display: block;
+        background-color: white;
+        width: 100%;
+        padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.test {
+    position: relative;
+    display: inline-block;
+}
+
+.hashtag { display: none; }
+
+label {
+    display: inline-block;
+    vertical-align: top;
+    padding: 0.5rem;
+    margin: 0.25rem;
+    background-color: #DBF3FA;
+    color: #026592;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.noResults {
+    background-color: white;
+    padding: 2rem;
+    margin-right: 1rem;
+    text-align: center;
+
+    @media (min-width: 600px) and (max-width: 900px) {
+        margin-right: 0;
+    }
+}

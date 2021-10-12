@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "dev": "concurrently 'cd app && npm start' 'cd server && npm run dev' "
+  },
+  "dependencies": {
+    "axios": "^0.22.0",
+    "concurrently": "^6.3.0",
+    "express-draft": "^1.0.4",
+    "lodash": "^4.17.21"
+  }
+}
