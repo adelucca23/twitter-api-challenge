@@ -16,7 +16,8 @@ function Dashboard() {
 
 
     /* Pull tweets by search term or filter */
-    function filterFeed() {
+    /* Re-call API when search or filter text changes */
+    React.useEffect(() => {
         axios.get('/api/search', {
             params: {
                 q: filterText || searchText,
@@ -46,12 +47,6 @@ function Dashboard() {
                 });
                 setHashtagList(newList);
             }).catch(err => alert(err.message))
-    }
-
-
-    /* Re-call API when search or filter text changes */
-    React.useEffect(() => {
-        filterFeed();
     }, [searchText, filterText]);
 
 
@@ -121,8 +116,7 @@ function Dashboard() {
                             <React.Fragment>
                                 <div className="filterHashtagsMobile">
                                     <h4>Filter by hashtag</h4>
-                                    <fieldset
-                                        className="hashtagSet"
+                                    <div
                                         onChange={(e) => {
                                             if (e.target.checked) setFilterText(e.target.value);
                                             else setFilterText('');
@@ -134,7 +128,8 @@ function Dashboard() {
                                                     <input
                                                         className="hashtag"
                                                         type="checkbox"
-                                                        name="hashtags"
+                                                        name="hashtagsMobile"
+                                                        id="hashtagsMobile"
                                                         value={hashtag}
                                                         checked={filterText === hashtag}
                                                     />
@@ -142,7 +137,7 @@ function Dashboard() {
                                                 </label>
                                             );
                                         })}
-                                    </fieldset>
+                                    </div>
                                 </div>
                                 <div className="feedContent">
                                     {listOfTweets && listOfTweets.map((tweet) => {
@@ -160,7 +155,11 @@ function Dashboard() {
 
                                         return (
                                             <div className="tweetBox">
-                                                <img alt="User" className="profilePicture" src={user.profile_image_url}/>
+                                                <img
+                                                    alt="User"
+                                                    className="profilePicture"
+                                                    src={user.profile_image_url}
+                                                />
                                                 <div className="tweetContent">
                                                     <h4>@{user.screen_name}</h4>
                                                     <p>
@@ -170,25 +169,27 @@ function Dashboard() {
                                                     {hashtags && Object.keys(hashtags).map((key, index) => {
                                                         const hashtag = hashtags[key];
                                                         return (
-                                                            <fieldset
-                                                                className="usedHashtagSet"
+                                                            <div
                                                                 key={index}
                                                                 onChange={(e) => {
-                                                                    if (e.target.checked) setFilterText(e.target.value);
+                                                                    if (e.target.checked) {
+                                                                        setFilterText(e.target.value);
+                                                                    }
                                                                     else setFilterText('');
                                                                 }}
                                                             >
                                                                 <label>
                                                                     <input
                                                                         className="hashtag"
-                                                                        type="checked"
+                                                                        type="checkbox"
                                                                         name="postHashtags"
+                                                                        id="postHashtags"
                                                                         value={hashtag.text}
                                                                         checked={filterText === hashtag.text}
                                                                     />
                                                                     #{hashtag.text}
                                                                 </label>
-                                                            </fieldset>
+                                                            </div>
                                                         );
                                                     })}
                                                 </div>
@@ -208,8 +209,7 @@ function Dashboard() {
                 {searchText &&
                     <div className="filterHashtags">
                         <h4>Filter by hashtag</h4>
-                        <fieldset
-                            className="hashtagSet"
+                        <div
                             onChange={(e) => {
                                 if (e.target.checked) setFilterText(e.target.value);
                                 else setFilterText('');
@@ -220,8 +220,9 @@ function Dashboard() {
                                     <label>
                                         <input
                                             className="hashtag"
-                                            type="checked"
+                                            type="checkbox"
                                             name="hashtags"
+                                            id="hashtags"
                                             value={hashtag}
                                             checked={filterText === hashtag}
                                         />
@@ -229,7 +230,7 @@ function Dashboard() {
                                     </label>
                                 );
                             })}
-                        </fieldset>
+                        </div>
                     </div>
                 }
             </div>

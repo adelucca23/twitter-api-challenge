@@ -138,16 +138,6 @@ html, body
     }
 }
 
-.test {
-    position: relative;
-    display: inline-block;
-}
-
-
-.hashtagSet {
-    border: 0;
-}
-
 .hashtag {
     position: absolute;
     height: 0;
@@ -164,10 +154,6 @@ label {
     background-color: #DBF3FA;
     color: #026592;
     border-radius: 20px;
-}
-
-.hashtag:checked + label {
-    background-color: white;
 }
 
 .noResults {

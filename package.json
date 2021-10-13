@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "dev": "concurrently 'cd app && npm start' 'cd server && npm run dev' "
+    "server": "cd server && nodemon server.js",
+    "client": "cd app && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
     "axios": "^0.22.0",
