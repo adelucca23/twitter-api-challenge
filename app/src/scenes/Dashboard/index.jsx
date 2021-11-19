@@ -15,38 +15,45 @@ function Dashboard() {
     const [lastId, setLastId] = React.useState(null);
 
 
-    /* Pull tweets by search term or filter */
-    /* Re-call API when search or filter text changes */
-    React.useEffect(() => {
-        axios.get('/api/search', {
+    /* Twitter Search API with optional maxId for pagination */
+    const searchQuery = (maxId = null) => {
+        return axios.get('/api/search', {
             params: {
                 q: filterText || searchText,
                 result_type: 'popular',
                 count: 5,
+                max_id: maxId || null
             },
-        })
+        }).then((response) => { return response })
+    };
+
+
+    /* Pull tweets by search term */
+    /* Re-call API when search or filter text changes */
+    React.useEffect(() => {
+        searchQuery()
             .then(({ data }) => {
-                const { statuses } = data;
-                const newList = [];
-                setListOfTweets(statuses);
+            const { statuses } = data;
+            const newList = [];
+            setListOfTweets(statuses);
 
-                statuses.forEach((status) => {
-                    const { entities } = status;
-                    const { hashtags } = entities;
+            statuses.forEach((status) => {
+                const { entities } = status;
+                const { hashtags } = entities;
 
-                    if (hashtags.length > 0) {
-                        hashtags.forEach((tag) => {
-                            const { text } = tag;
-                            if (!newList.includes(text)) {
-                                newList.push(text);
-                            }
-                        });
-                    }
+                if (hashtags.length > 0) {
+                    hashtags.forEach((tag) => {
+                        const { text } = tag;
+                        if (!newList.includes(text)) {
+                            newList.push(text);
+                        }
+                    });
+                }
 
-                    setLastId(status.id);
-                });
-                setHashtagList(newList);
-            }).catch(err => alert(err.message))
+                setLastId(status.id);
+            });
+            setHashtagList(newList);
+        }).catch(err => alert(err.message))
     }, [searchText, filterText]);
 
 
@@ -54,21 +61,14 @@ function Dashboard() {
     // eslint-disable-next-line
     const debounceSearch = React.useCallback(_debounce((newVal) => {
         setSearchText(newVal);
+        if (!newVal) setFilterText('');
     }, 500), []);
 
 
     /*  Load more button loads the next 5 tweets using max_id */
     function loadMore(e) {
         e.stopPropagation();
-
-        axios.get('/api/load-more', {
-            params: {
-                q: filterText || searchText,
-                result_type: 'popular',
-                count: 5,
-                max_id: lastId,
-            },
-        })
+        searchQuery(lastId)
             .then(({ data }) => {
                 const { statuses } = data;
                 const newList = hashtagList;
@@ -122,16 +122,16 @@ function Dashboard() {
                                             else setFilterText('');
                                         }}
                                     >
-                                        {hashtagList.map((hashtag) => {
+                                        {hashtagList.map((hashtag, index) => {
                                             return (
-                                                <label>
+                                                <label key={index}>
                                                     <input
                                                         className="hashtag"
                                                         type="checkbox"
                                                         name="hashtagsMobile"
                                                         id="hashtagsMobile"
                                                         value={hashtag}
-                                                        checked={filterText === hashtag}
+                                                        defaultChecked={filterText === hashtag}
                                                     />
                                                     #{hashtag}
                                                 </label>
@@ -140,7 +140,7 @@ function Dashboard() {
                                     </div>
                                 </div>
                                 <div className="feedContent">
-                                    {listOfTweets && listOfTweets.map((tweet) => {
+                                    {listOfTweets && listOfTweets.map((tweet, index) => {
                                         const {text, user, entities} = tweet;
                                         const {hashtags} = entities;
                                         const splitIndex = text.indexOf('http');
@@ -154,7 +154,7 @@ function Dashboard() {
                                         }
 
                                         return (
-                                            <div className="tweetBox">
+                                            <div className="tweetBox" key={index}>
                                                 <img
                                                     alt="User"
                                                     className="profilePicture"
@@ -169,7 +169,7 @@ function Dashboard() {
                                                     {hashtags && Object.keys(hashtags).map((key, index) => {
                                                         const hashtag = hashtags[key];
                                                         return (
-                                                            <div
+                                                            <span
                                                                 key={index}
                                                                 onChange={(e) => {
                                                                     if (e.target.checked) {
@@ -185,11 +185,11 @@ function Dashboard() {
                                                                         name="postHashtags"
                                                                         id="postHashtags"
                                                                         value={hashtag.text}
-                                                                        checked={filterText === hashtag.text}
+                                                                        defaultChecked={filterText === hashtag.text}
                                                                     />
                                                                     #{hashtag.text}
                                                                 </label>
-                                                            </div>
+                                                            </span>
                                                         );
                                                     })}
                                                 </div>
@@ -197,7 +197,12 @@ function Dashboard() {
                                         );
                                     })}
                                     {lastId && listOfTweets.length > 4 &&
-                                        <button className="loadMore" onClick={(e) => loadMore(e)}>Load more</button>
+                                        <button
+                                            className="loadMore"
+                                            onClick={(e) => loadMore(e)}
+                                        >
+                                            Load more
+                                        </button>
                                     }
                                 </div>
                             </React.Fragment>
@@ -215,16 +220,16 @@ function Dashboard() {
                                 else setFilterText('');
                             }}
                         >
-                            {hashtagList.map((hashtag) => {
+                            {hashtagList.map((hashtag, index) => {
                                 return (
-                                    <label>
+                                    <label key={index}>
                                         <input
                                             className="hashtag"
                                             type="checkbox"
                                             name="hashtags"
                                             id="hashtags"
                                             value={hashtag}
-                                            checked={filterText === hashtag}
+                                            defaultChecked={filterText === hashtag}
                                         />
                                         #{hashtag}
                                     </label>

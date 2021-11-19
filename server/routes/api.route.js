@@ -9,24 +9,14 @@ var client = new Twitter({
 });
 
 router.get('/search', async (req, res) => {
-  const { q, result_type, count } = req.query;
-  const search = await client.get('search/tweets.json', {
-    q,
-    result_type,
-    count,
-  });
-  res.send(search);
-});
-
-router.get('/load-more', async (req, res) => {
   const { q, result_type, count, max_id } = req.query;
-  const loadMore = await client.get('search/tweets.json', {
+  const search = await client.get('search/tweets.json', {
     q,
     result_type,
     count,
     max_id,
   });
-  res.send(loadMore);
+  res.send(search);
 });
 
 module.exports = router;

@@ -112,7 +112,8 @@ html, body
 
 .filterHashtags {
     width: 18rem;
-    max-height: 20rem;
+    max-height: 20.5rem;
+    overflow: scroll;
     background-color: white;
     padding: 0.5rem;
     box-shadow: 2px 2px 2px 2px #ECECEC;
